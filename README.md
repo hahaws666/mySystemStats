@@ -1,6 +1,8 @@
 # mySystemStats
 this is a file to monitor the stats of a linux system
 ## funcions
+### int getusage()
+get the memory usage of this program
 ### bool isInteger(const char* str)
 identify whether a char is int
 ### addStringToList(char* list[], int* count, const char* newString) 
