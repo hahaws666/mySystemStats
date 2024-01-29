@@ -6,12 +6,18 @@
 #include <unistd.h>
 #include <sys/utsname.h>
 #include <sys/sysinfo.h>
+#include <sys/resource.h>
 #include <utmp.h>
 #include <unistd.h>
 #include <stdbool.h>
 #include <time.h>
 #include <ctype.h>
 
+int getusage(){
+        struct rusage usage;
+    getrusage(RUSAGE_SELF, &usage);
+    return usage.ru_maxrss;
+}
 
 bool isInteger(const char* str) {
     // if (str == NULL || *str == '\0') {
@@ -218,6 +224,7 @@ void displayMemoryandCpu(int tdelay , int samples,int refresh){
     char* memorylist[100]; // Array to store
     int samplememorycount = 0; //
 
+
     
     for (int i = 0; i < samples; i++)
     {
@@ -226,11 +233,14 @@ void displayMemoryandCpu(int tdelay , int samples,int refresh){
             /* code */
             printf("\033[H\033[J"); // This clears the screen (Unix-based systems)
         }
+    int curusage=getusage();
     double x = calculateCPUUsage(cpulist,&samplecount);
     double y=print_memory_usage(memorylist,&samplememorycount);
     printf("sampels: %d\n", samples);
     printf("---------------------------------------\n");
     printf("tdelay: %d\n", tdelay);
+    printf("---------------------------------------\n");
+    printf("memory usage: %dkb\n", curusage);
     printf("---------------------------------------\n");
 
     printCPUList(cpulist,samplecount);        
@@ -350,6 +360,7 @@ void displaymemoryandcpuingarph(int tdelay , int samples, int sqe){
     int samplecount = 0; // Number of strings in the list
     char* memorylist[100]; // Array to store
     int samplememorycount = 0; //
+    
     for (int i = 0; i < samples; i++)
     {
         if (sqe==0)
@@ -362,9 +373,12 @@ void displaymemoryandcpuingarph(int tdelay , int samples, int sqe){
     y=calculatememorygraph(previousmem,memorylist,&samplememorycount);
     previousmem=y;  
     previouscpu=x;
+    int curusage=getusage();
     printf("sampels: %d\n", samples);
     printf("---------------------------------------\n");
     printf("tdelay: %d\n", tdelay);
+    printf("---------------------------------------\n");
+    printf("memory usage: %dkb\n", curusage);
     printf("---------------------------------------\n");
     printCPUList(cpulist,samplecount);        
     printf("---------------------------------------\n");
@@ -398,11 +412,13 @@ void printbasicsysteminfo(){
         struct sysinfo sysInfo;
 
     if (uname(&systemInfo) != -1) {
+        printf("### System Information ###\n");
         printf("System Name: %s\n", systemInfo.sysname);
         printf("Machine Name: %s\n", systemInfo.nodename);
-        printf("release Name: %s\n", systemInfo.release);
+        printf("release : %s\n", systemInfo.release);
+        printf("version : %s\n", systemInfo.version);
         printf("Architecture Name: %s\n", systemInfo.machine);
-        printf("version Name: %s\n", systemInfo.version);
+
     } else {
         perror("uname");
     }
@@ -446,8 +462,9 @@ int main(int argc, char **argv) {
     int printsys=0;
     int printuser=0, printgraph=0,printsequential=0;
 
+
     if (argc == 1) {
-        displayMemoryandCpu(delay ,samples,1);
+        displayMemoryandCpu(delay ,samples,0);
         // displaymemoryandcpuingarph(delay ,samples); 
         printf("--------------------------------------------------------\n");
         printuserinfo();
@@ -540,16 +557,12 @@ int main(int argc, char **argv) {
                 displaymemoryandcpuingarph(delay,samples,printsequential);
                 printf("--------------------------------------------------------\n");
                 getNumCores();
-                printf("--------------------------------------------------------\n");
-                printbasicsysteminfo(); // Display
             }
             else
             {
                 displayMemoryandCpu(delay,samples,printsequential);
                 printf("--------------------------------------------------------\n");
                 getNumCores();
-                printf("--------------------------------------------------------\n");
-                printbasicsysteminfo(); // Display
             }
             
             
@@ -557,7 +570,7 @@ int main(int argc, char **argv) {
         else if (printsys==0 &&printuser==1)
         {
             /* code */
-                printf("--------------------------------------------------------\n");
+            printf("--------------------------------------------------------\n");
             printuserinfo();
         }
         else
@@ -571,6 +584,7 @@ int main(int argc, char **argv) {
                 printuserinfo();
                 printf("--------------------------------------------------------\n");
                 printbasicsysteminfo(); // Display
+                printlasttime(); // Display last time
             }
             else
             {
