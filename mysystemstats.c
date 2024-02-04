@@ -240,20 +240,21 @@ void displayMemoryandCpu(int tdelay , int samples,int refresh){
             printf("\033[H\033[J"); // This clears the screen (Unix-based systems)
         }
     int curusage=getusage();
-    double x = calculateCPUUsage(cpulist,&samplecount);
     double y=get_memory_usage(memorylist,&samplememorycount);
+    double x = calculateCPUUsage(cpulist,&samplecount);
     printf("sampels: %d\n", samples);
     printf("---------------------------------------\n");
     printf("tdelay: %d\n", tdelay);
     printf("---------------------------------------\n");
     printf("memory usage: %dkb\n", curusage);
     printf("---------------------------------------\n");
-
-    printCPUList(cpulist,samplecount);        
-    printf("---------------------------------------\n");
-
-
     printmemoryList(memorylist,samplememorycount);
+    for (int j = i; j < samples; j++)
+    {
+        printf("\n");
+    }
+    printf("---------------------------------------\n");
+    printCPUList(cpulist,samplecount);        
     sleep(tdelay);
 
 
@@ -394,9 +395,15 @@ void displaymemoryandcpuingarph(int tdelay , int samples, int sqe){
     printf("---------------------------------------\n");
     printf("memory usage: %dkb\n", curusage);
     printf("---------------------------------------\n");
-    printCPUList(cpulist,samplecount);        
-    printf("---------------------------------------\n");
     printmemoryList(memorylist,samplememorycount);
+    for (int j = i; j < samples; j++)
+    {
+        printf("\n");
+    }
+    
+    printf("---------------------------------------\n");
+    printCPUList(cpulist,samplecount);        
+
     sleep(tdelay);
     }
 
